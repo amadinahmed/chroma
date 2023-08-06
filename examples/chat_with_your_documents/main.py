@@ -1,3 +1,7 @@
+__import__("pysqlite3")
+import sys
+
+sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 import argparse
 import os
 from typing import List, Dict
@@ -26,11 +30,7 @@ def build_prompt(query: str, context: List[str]) -> List[Dict[str, str]]:
 
     system = {
         "role": "system",
-        "content": "I am going to ask you a question, which I would like you to answer"
-        "based only on the provided context, and not any other information."
-        "If there is not enough information in the context to answer the question,"
-        'say "I am not sure", then try to make a guess.'
-        "Break your answer up into nicely readable paragraphs.",
+        "content": "Answer my Questions based onthe data i give",
     }
     user = {
         "role": "user",
@@ -54,8 +54,7 @@ def get_chatGPT_response(query: str, context: List[str]) -> str:
     """
 
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=build_prompt(query, context),
+        model="gpt-4", messages=build_prompt(query, context), temperature=0
     )
 
     return response.choices[0].message.content  # type: ignore
@@ -65,11 +64,8 @@ def main(
     collection_name: str = "documents_collection", persist_directory: str = "."
 ) -> None:
     # Check if the OPENAI_API_KEY environment variable is set. Prompt the user to set it if not.
-    if "OPENAI_API_KEY" not in os.environ:
-        openai.api_key = input(
-            "Please enter your OpenAI API Key. You can get it from https://platform.openai.com/account/api-keys\n"
-        )
 
+    openai.api_key = "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"
     # Instantiate a persistent chroma client in the persist_directory.
     # This will automatically load any previously saved collections.
     # Learn more at docs.trychroma.com
